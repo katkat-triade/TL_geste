@@ -16,6 +16,7 @@
 #include <fstream>
 #include <complex>
 #include "coeff_fourier.hpp"
+#include "coeff_fourier_inverse.hpp"
 //#include "compare_prototype.hpp"
 
 
@@ -35,9 +36,9 @@ void thresh_callback(int, void* );
 int main( int argc, char** argv )
 {
         //Declaration des variables
-        int cmax(15);
-        //int  N(200), cmax(15);
-        int Nomb = 3;
+        //int cmax(30);
+        int  N(200), cmax(30);
+        int Nomb = 20;
         vector<Mat> liste_image;
         /*
         //Chargement des prototypes
@@ -52,8 +53,8 @@ int main( int argc, char** argv )
         //Création de la liste d'images
         for ( int d=1; d<Nomb+1;d++){
                 Mat image;
-                //string filename = "resultat2_avance" + to_string(d) +".pgm";
-                string filename = "hand" + to_string(d) +".png";
+                string filename = "resultat2_avance" + to_string(d) +".pgm";
+                //string filename = "hand" + to_string(d) +".png";
                 image = imread(filename.c_str(),1);   // Read the file
                 liste_image.push_back(image);
                 //liste=dir('*.pgm');
@@ -92,21 +93,16 @@ int main( int argc, char** argv )
                 //imwrite( "contour.png", zliste );
                 //Fin findContours
 
-                Point centre(canny_output.cols/2, canny_output.rows/2);
-                int longmax = 0;
-                int index = 1;
-                int longueur = 0;
-                vector<Point> z;
-                vector<Point> z_reconstructed(2*cmax+1);
-                Point coord;
-                vector<complex<double>> coeffs2(2*cmax+1); 
-                vector<complex<double>> coeffs2r(2*cmax+1); 
-                vector<complex<double>> coeffs3; 
+
+                
 
 
 
                 //vector<vector<Point>> tabcontfil;
                 // On itère sur l'ensemble des contours
+                int index = 1;
+                int longueur = 0;
+                int longmax = 0;
                 const int nb_contours = contours.size(); 
                 for(int i  = 0; i< nb_contours; i++ )
                 {
@@ -120,6 +116,7 @@ int main( int argc, char** argv )
 
                 }	
                 //z is the biggest contour
+                vector<Point> z;
                 z = contours.at(index); 
 
                 //draw this contour
@@ -131,41 +128,18 @@ int main( int argc, char** argv )
 
 
                 // z_comp is the complex representation of z
-                vector<complex<double>> z_comp;
-                //complex<double> centre(500, -300);
-                for( int j = 1; j < longmax -1 ; j++){  
-                        complex<double> z_point(z[j].x, z[j].y); 
-                        z_comp.push_back(z_point);
-                } 
-                coeffs2 = coeff_fourier(z_comp, cmax);
-                //dft(z_comp, coeffs2, DFT_COMPLEX_OUTPUT + DFT_SCALE);
-                /*
-                for(int j = 1; j<cmax+1; j++ ){
-                  coeffs2r[j+cmax] = coeffs2[j];
-                  cout<<coeffs2[j+cmax]<<endl;
-                }
-                 for(int j = 1; j<cmax+1; j++ ){
-                   coeffs2r[j] = coeffs2[j+cmax];
-                }                
-  
+                //:::::::::::::DANS LE MAIN
+                Point centre((double)canny_output.cols/2, (double)canny_output.rows/2);
+                double ech = 50;        
+                //:::::::::::::::
 
-                dft(coeffs2r, coeffs2r, DFT_INVERSE);
-                */
-                dft(coeffs2, coeffs2r, DFT_INVERSE + DFT_SCALE);
-                for( size_t j = 1; j < coeffs2r.size() ; j++){
-                    if(coeffs2r[j].imag() != 0){
-                Point z_point(coeffs2r[j].real()*500 + centre.x, coeffs2r[j].imag()*500 + centre.y);
-                z_reconstructed.push_back(z_point);
-                    }
-                    else{
-                        Point z_point(0,0);
-                    z_reconstructed.push_back(z_point);
-                }
-                  }
+                vector<complex<double>> coeffs; 
+                coeffs = coeff_fourier(z, cmax, centre);
 
-                //On draw le contour reconstruit
                 vector<vector<Point>> drawReconstructedContour;
-                drawReconstructedContour.push_back(z_reconstructed);
+ 
+                drawReconstructedContour = coeff_fourier_inverse(coeffs, centre, cmax, N, ech);
+               
                 Mat myFrame2 = Mat::zeros(canny_output.rows, canny_output.cols, CV_8UC3);
                 drawContours(myFrame2,drawReconstructedContour,0,color,2, 8, hierarchy, 0, Point());
                 imwrite( "contourReconstruit"+ to_string(n) +".png", myFrame2 );

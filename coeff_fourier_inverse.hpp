@@ -17,4 +17,5 @@
 #include <string>
 
 
-std::vector<std::complex<double> > coeff_fourier(std::vector<cv::Point> z, int cmax, cv::Point centre);
+std::vector<std::vector<cv::Point>> coeff_fourier_inverse(std::vector<std::complex<double> > coeffs, cv::Point centre, int cmax, int N, double ech);
+

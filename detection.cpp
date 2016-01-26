@@ -80,7 +80,7 @@ vector<vector<Point>> detection(Mat frame, int w, int l){
         findContours( edges, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, Point(0, 0) );
         drawContours(myContour, contours,-1,blueColor,2,2);
         add(frame, myContour, frame);
-        imshow("edges", frame);
+        //imshow("edges", frame);
 
         int longmax = 0;
         int index = 1;
